@@ -9,4 +9,6 @@ LOCAL_SDK_VERSION := current
 
 LOCAL_PACKAGE_NAME := RemoteIME
 
+LOCAL_CERTIFICATE := platform
+
 include $(BUILD_PACKAGE)
