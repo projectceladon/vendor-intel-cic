@@ -227,7 +227,12 @@ function increase_limits() {
     sudo su - root -c 'echo "1000" > /sys/kernel/mm/ksm/pages_to_scan'
 }
 
-function check_binderfs() {
+function mount_binderfs() {
+    if [ ! -d "/dev/binderfs" ]; then
+        echo "Create binderfs mount point /dev/binderfs..."
+        sudo mkdir -p /dev/binderfs
+    fi
+    umount_binderfs
 
     binder_kernel_config=`cat /lib/modules/$(uname -r)/build/.config 2>/dev/null | grep CONFIG_ANDROID_BINDERFS | cut -d "=" -f 2`
     if [ "$binder_kernel_config" == "y" ];then
@@ -238,6 +243,17 @@ function check_binderfs() {
             echo "[AIC] Waiting for binderfs module installed..."
             sleep 1
         done
+    fi
+    sudo mount -t binder binder /dev/binderfs
+}
+
+function umount_binderfs() {
+    if [[ $(findmnt -M "/dev/binderfs") ]]; then
+        echo "Umount binderfs..."
+        find /dev/binderfs/*binder*[0-9] 2> /dev/null | while read line; do
+            sudo unlink $line
+        done
+        sudo umount /dev/binderfs
     fi
 }
 
@@ -600,7 +616,7 @@ function install {
     $DOCKER container create --name aic-manager --init --net host --privileged=true $AIC_MANAGER_CONTAINER_OPTION $AIC_MANAGER_IMAGE $AIC_MANAGER_CONTAINER_CMDS
 
     # create Android containers
-    ANDROID_CONTAINER_OPTION="-v $APP_DIR:/oem/app:ro -v $WORK_DIR/ipc:/ipc "
+    ANDROID_CONTAINER_OPTION="-v $APP_DIR:/oem/app:ro -v $WORK_DIR/ipc:/ipc -v /dev/binderfs:/binderfs:rw"
     get_system_image_mount_options && ANDROID_CONTAINER_OPTION="$ANDROID_CONTAINER_OPTION $SYSTEM_IMAGE_MOUNT_OPTIONS"
     if [ ! -z "$DISPLAY_DENSITY" ]; then
         ANDROID_CONTAINER_CMDS="-t $DISPLAY_DENSITY"
@@ -692,6 +708,9 @@ function uninstall {
 
     # umount FUSE mount point if any
     umount_fuse_folder
+
+    # umount binderfs mount point if any
+    umount_binderfs
 }
 
 function start {
@@ -774,7 +793,7 @@ function start {
             xhost +local:$($DOCKER inspect --format='{{ .Config.Hostname }}' aic-manager) > /dev/null 2>&1
         fi
         $DOCKER start aic-manager
-        check_binderfs
+        mount_binderfs
     fi
 
     EXISTED_CONTAINERS=$($DOCKER ps -a | awk '{print $NF}' | grep android)
@@ -858,6 +877,8 @@ function stop {
         $DOCKER stop aic-manager
         # umount FUSE mount point if any
         umount_fuse_folder
+        # umount binderfs mount point if any
+        umount_binderfs
     fi
 }
 
