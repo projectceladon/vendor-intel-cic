@@ -50,7 +50,7 @@ public class IpConfig {
         out.writeUTF("172.100.0.1");
 
         out.writeUTF(DNS_KEY);
-        out.writeUTF("172.100.0.1");
+        out.writeUTF("114.114.114.114");
 
         out.writeUTF(ID_KEY);
         out.writeUTF("eth0");
