@@ -33,8 +33,14 @@ LOCAL_C_INCLUDES += \
     system/extras/tests/include \
     frameworks/base/include
 
-LOCAL_MODULE := androidClient
-LOCAL_SRC_FILES := androidClient.cpp
+LOCAL_MODULE := sumClientAndroid
+LOCAL_AIDL_INCLUDES := \
+    vendor/intel/cic/target/apps/libbinder_test_android/sum
+
+LOCAL_SRC_FILES := \
+    sum/ISum.aidl \
+    sumClientAndroid.cpp
+
 LOCAL_CFLAGS:= -Wall -Werror
 
 include $(BUILD_EXECUTABLE)
@@ -56,8 +62,14 @@ LOCAL_C_INCLUDES += \
     system/extras/tests/include \
     frameworks/base/include
 
-LOCAL_MODULE := androidService
-LOCAL_SRC_FILES := androidService.cpp
+LOCAL_MODULE := multiplyServiceAndroid
+LOCAL_AIDL_INCLUDES := \
+    vendor/intel/cic/target/apps/libbinder_test_android/multiply
+
+LOCAL_SRC_FILES := \
+    multiply/IMultiply.aidl \
+    multiplyServiceAndroid.cpp
+    
 LOCAL_CFLAGS:= -Wall -Werror
 
 include $(BUILD_EXECUTABLE)
