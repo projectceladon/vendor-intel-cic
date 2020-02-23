@@ -1,8 +1,12 @@
-#ifndef AIDL_GENERATED_MULTIPLY_BN_MULTIPLY_H_
-#define AIDL_GENERATED_MULTIPLY_BN_MULTIPLY_H_
+#ifndef AIDL_GENERATED_COM_INTEL_MULTIPLY_BN_MULTIPLY_H_
+#define AIDL_GENERATED_COM_INTEL_MULTIPLY_BN_MULTIPLY_H_
 
 #include <binder/IInterface.h>
-#include <multiply/IMultiply.h>
+#include <com/intel/multiply/IMultiply.h>
+
+namespace com {
+
+namespace intel {
 
 namespace multiply {
 
@@ -13,4 +17,8 @@ public:
 
 }  // namespace multiply
 
-#endif  // AIDL_GENERATED_MULTIPLY_BN_MULTIPLY_H_
+}  // namespace intel
+
+}  // namespace com
+
+#endif  // AIDL_GENERATED_COM_INTEL_MULTIPLY_BN_MULTIPLY_H_

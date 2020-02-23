@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package multiply;
+package com.intel.multiply;
 
 interface IMultiply {
     int multiply(int a, int b);

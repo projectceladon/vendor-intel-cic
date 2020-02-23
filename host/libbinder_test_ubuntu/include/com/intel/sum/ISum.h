@@ -1,11 +1,15 @@
-#ifndef AIDL_GENERATED_SUM_I_SUM_H_
-#define AIDL_GENERATED_SUM_I_SUM_H_
+#ifndef AIDL_GENERATED_COM_INTEL_SUM_I_SUM_H_
+#define AIDL_GENERATED_COM_INTEL_SUM_I_SUM_H_
 
 #include <binder/IBinder.h>
 #include <binder/IInterface.h>
 #include <binder/Status.h>
 #include <cstdint>
 #include <utils/StrongPointer.h>
+
+namespace com {
+
+namespace intel {
 
 namespace sum {
 
@@ -20,4 +24,8 @@ enum Call {
 
 }  // namespace sum
 
-#endif  // AIDL_GENERATED_SUM_I_SUM_H_
+}  // namespace intel
+
+}  // namespace com
+
+#endif  // AIDL_GENERATED_COM_INTEL_SUM_I_SUM_H_

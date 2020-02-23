@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package sum;
+package com.intel.sum;
 
 interface ISum {
     int sum(int a, int b);

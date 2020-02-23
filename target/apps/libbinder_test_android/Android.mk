@@ -35,10 +35,10 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_MODULE := sumClientAndroid
 LOCAL_AIDL_INCLUDES := \
-    vendor/intel/cic/target/apps/libbinder_test_android/sum
+    vendor/intel/cic/target/apps/libbinder_test_android/com/intel/sum
 
 LOCAL_SRC_FILES := \
-    sum/ISum.aidl \
+    com/intel/sum/ISum.aidl \
     sumClientAndroid.cpp
 
 LOCAL_CFLAGS:= -Wall -Werror
@@ -64,12 +64,22 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_MODULE := multiplyServiceAndroid
 LOCAL_AIDL_INCLUDES := \
-    vendor/intel/cic/target/apps/libbinder_test_android/multiply
+    vendor/intel/cic/target/apps/libbinder_test_android/com/intel/multiply
 
 LOCAL_SRC_FILES := \
-    multiply/IMultiply.aidl \
+    com/intel/multiply/IMultiply.aidl \
     multiplyServiceAndroid.cpp
     
 LOCAL_CFLAGS:= -Wall -Werror
 
 include $(BUILD_EXECUTABLE)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := $(call all-java-files-under,subtraction) $(call all-Iaidl-files-under,subtraction)
+LOCAL_PACKAGE_NAME := SubtractServiceApplication
+LOCAL_SDK_VERSION := current
+LOCAL_PROGUARD_ENABLED := disabled
+LOCAL_CERTIFICATE := platform
+LOCAL_PRIVILEGED_MODULE := true
+include $(BUILD_PACKAGE)

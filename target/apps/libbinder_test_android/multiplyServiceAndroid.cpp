@@ -18,12 +18,16 @@
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <iostream>
-#include "multiply/BnMultiply.h"
+#include "com/intel/multiply/BnMultiply.h"
 
 using namespace android;
-using namespace multiply;
+using namespace com::intel::multiply;
 using namespace std;
 
+namespace com
+{
+namespace intel
+{
 namespace multiply
 {
 class MultipyService : public multiply::BnMultiply
@@ -38,6 +42,8 @@ public:
     }
 };
 } // namespace multiply
+} // namespace intel
+} // namespace com
 
 int main()
 {

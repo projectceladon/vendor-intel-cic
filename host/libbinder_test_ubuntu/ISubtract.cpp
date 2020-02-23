@@ -1,33 +1,33 @@
-#include <com/intel/sum/ISum.h>
-#include <com/intel/sum/BpSum.h>
+#include <com/intel/subtract/ISubtract.h>
+#include <com/intel/subtract/BpSubtract.h>
 
 namespace com {
 
 namespace intel {
 
-namespace sum {
+namespace subtract {
 
-IMPLEMENT_META_INTERFACE(Sum, "com.intel.sum.ISum")
+IMPLEMENT_META_INTERFACE(Subtract, "com.intel.subtract.ISubtract")
 
-}  // namespace sum
+}  // namespace subtract
 
 }  // namespace intel
 
 }  // namespace com
-#include <com/intel/sum/BpSum.h>
+#include <com/intel/subtract/BpSubtract.h>
 #include <binder/Parcel.h>
 
 namespace com {
 
 namespace intel {
 
-namespace sum {
+namespace subtract {
 
-BpSum::BpSum(const ::android::sp<::android::IBinder>& _aidl_impl)
-    : BpInterface<ISum>(_aidl_impl){
+BpSubtract::BpSubtract(const ::android::sp<::android::IBinder>& _aidl_impl)
+    : BpInterface<ISubtract>(_aidl_impl){
 }
 
-::android::binder::Status BpSum::sum(int32_t a, int32_t b, int32_t* _aidl_return) {
+::android::binder::Status BpSubtract::subtract(int32_t a, int32_t b, int32_t* _aidl_return) {
 ::android::Parcel _aidl_data;
 ::android::Parcel _aidl_reply;
 ::android::status_t _aidl_ret_status = ::android::OK;
@@ -44,7 +44,7 @@ _aidl_ret_status = _aidl_data.writeInt32(b);
 if (((_aidl_ret_status) != (::android::OK))) {
 goto _aidl_error;
 }
-_aidl_ret_status = remote()->transact(ISum::SUM, _aidl_data, &_aidl_reply);
+_aidl_ret_status = remote()->transact(ISubtract::SUBTRACT, _aidl_data, &_aidl_reply);
 if (((_aidl_ret_status) != (::android::OK))) {
 goto _aidl_error;
 }
@@ -64,24 +64,24 @@ _aidl_status.setFromStatusT(_aidl_ret_status);
 return _aidl_status;
 }
 
-}  // namespace sum
+}  // namespace subtract
 
 }  // namespace intel
 
 }  // namespace com
-#include <com/intel/sum/BnSum.h>
+#include <com/intel/subtract/BnSubtract.h>
 #include <binder/Parcel.h>
 
 namespace com {
 
 namespace intel {
 
-namespace sum {
+namespace subtract {
 
-::android::status_t BnSum::onTransact(uint32_t _aidl_code, const ::android::Parcel& _aidl_data, ::android::Parcel* _aidl_reply, uint32_t _aidl_flags) {
+::android::status_t BnSubtract::onTransact(uint32_t _aidl_code, const ::android::Parcel& _aidl_data, ::android::Parcel* _aidl_reply, uint32_t _aidl_flags) {
 ::android::status_t _aidl_ret_status = ::android::OK;
 switch (_aidl_code) {
-case Call::SUM:
+case Call::SUBTRACT:
 {
 int32_t in_a;
 int32_t in_b;
@@ -98,7 +98,7 @@ _aidl_ret_status = _aidl_data.readInt32(&in_b);
 if (((_aidl_ret_status) != (::android::OK))) {
 break;
 }
-::android::binder::Status _aidl_status(sum(in_a, in_b, &_aidl_return));
+::android::binder::Status _aidl_status(subtract(in_a, in_b, &_aidl_return));
 _aidl_ret_status = _aidl_status.writeToParcel(_aidl_reply);
 if (((_aidl_ret_status) != (::android::OK))) {
 break;
@@ -124,7 +124,7 @@ _aidl_ret_status = ::android::binder::Status::fromExceptionCode(::android::binde
 return _aidl_ret_status;
 }
 
-}  // namespace sum
+}  // namespace subtract
 
 }  // namespace intel
 

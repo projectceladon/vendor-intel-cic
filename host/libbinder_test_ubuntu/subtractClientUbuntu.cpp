@@ -16,15 +16,15 @@
  */
 #include <binder/IServiceManager.h>
 #include <iostream>
-#include <com/intel/multiply/IMultiply.h>
+#include <com/intel/subtract/ISubtract.h>
 
 using namespace android;
-using namespace com::intel::multiply;
+using namespace com::intel::subtract;
 using namespace std;
 
 int main()
 {
-  String16 serviceName("multiply");
+  String16 serviceName("subtract");
   String8 serviceNameString8(serviceName);
   android::binder::Status ret;
   int retry_count = 360;
@@ -64,23 +64,23 @@ int main()
 
   } while (retry_count-- > 0);
 
-  sp<IMultiply> ms = interface_cast<IMultiply>(binder);
-  if (!ms.get())
+  sp<ISubtract> ss = interface_cast<ISubtract>(binder);
+  if (!ss.get())
   {
     cout << "Error: Fail to cast interface." << endl;
     return 0;
   }
 
-  cout << "This test is used to multiply of two numbers: " << endl;
+  cout << "This test is used to subtract of two numbers: " << endl;
   cout << "Input a:";
   cin >> a;
   cout << "Input b:";
   cin >> b;
 
-  expected_value = a * b;
+  expected_value = a - b;
   cout << "a = " << a << " b = " << b << " expected_value = " << expected_value << endl;
 
-  ret = ms->multiply(a, b, &actual_value);
+  ret = ss->subtract(a, b, &actual_value);
   if (!ret.isOk())
   {
     cout << "Error: Fail to call service's function." << endl;

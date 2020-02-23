@@ -1,10 +1,14 @@
-#ifndef AIDL_GENERATED_SUM_BP_SUM_H_
-#define AIDL_GENERATED_SUM_BP_SUM_H_
+#ifndef AIDL_GENERATED_COM_INTEL_SUM_BP_SUM_H_
+#define AIDL_GENERATED_COM_INTEL_SUM_BP_SUM_H_
 
 #include <binder/IBinder.h>
 #include <binder/IInterface.h>
 #include <utils/Errors.h>
-#include <sum/ISum.h>
+#include <com/intel/sum/ISum.h>
+
+namespace com {
+
+namespace intel {
 
 namespace sum {
 
@@ -17,4 +21,8 @@ virtual ~BpSum() = default;
 
 }  // namespace sum
 
-#endif  // AIDL_GENERATED_SUM_BP_SUM_H_
+}  // namespace intel
+
+}  // namespace com
+
+#endif  // AIDL_GENERATED_COM_INTEL_SUM_BP_SUM_H_

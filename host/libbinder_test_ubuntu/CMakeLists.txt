@@ -54,7 +54,7 @@ link_directories(
   )
 
 set(AIDL_SUM_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/sum/ISum.aidl
+  ${CMAKE_CURRENT_SOURCE_DIR}/com/intel/sum/ISum.aidl
   )
 add_aidl_cpp(AIDL_SUM_CPP ${AIDL_SUM_FILES})
 
@@ -68,7 +68,7 @@ target_link_libraries(sumServiceUbuntu
 )
 
 set(AIDL_MULTIPLY_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/multiply/IMultiply.aidl
+  ${CMAKE_CURRENT_SOURCE_DIR}/com/intel/multiply/IMultiply.aidl
   )
 add_aidl_cpp(AIDL_MULTIPLY_CPP ${AIDL_MULTIPLY_FILES})
 
@@ -77,6 +77,20 @@ add_executable(multiplyClientUbuntu
   multiplyClientUbuntu.cpp
   )
 target_link_libraries(multiplyClientUbuntu
+  binder
+  pthread
+)
+
+set(AIDL_SUBTRACT_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/com/intel/subtract/ISubtract.aidl
+  )
+add_aidl_cpp(AIDL_SUBTRACT_CPP ${AIDL_SUBTRACT_FILES})
+
+add_executable(subtractClientUbuntu
+  ${AIDL_SUBTRACT_CPP}
+  subtractClientUbuntu.cpp
+  )
+target_link_libraries(subtractClientUbuntu
   binder
   pthread
 )

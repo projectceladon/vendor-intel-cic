@@ -19,12 +19,15 @@
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <iostream>
-#include "sum/BnSum.h"
+#include "com/intel/sum/BnSum.h"
 
 using namespace android;
-using namespace sum;
+using namespace com::intel::sum;
 using namespace std;
-
+namespace com
+{
+namespace intel
+{
 namespace sum
 {
 class SumService : public sum::BnSum
@@ -39,6 +42,8 @@ public:
   }
 };
 } // namespace sum
+} // namespace intel
+} // namespace com
 
 int main(int argc, char *argv[])
 {

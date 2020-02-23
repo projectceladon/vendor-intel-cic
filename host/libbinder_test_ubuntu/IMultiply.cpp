@@ -1,13 +1,25 @@
-#include <multiply/IMultiply.h>
-#include <multiply/BpMultiply.h>
+#include <com/intel/multiply/IMultiply.h>
+#include <com/intel/multiply/BpMultiply.h>
+
+namespace com {
+
+namespace intel {
 
 namespace multiply {
 
-IMPLEMENT_META_INTERFACE(Multiply, "multiply.IMultiply")
+IMPLEMENT_META_INTERFACE(Multiply, "com.intel.multiply.IMultiply")
 
 }  // namespace multiply
-#include <multiply/BpMultiply.h>
+
+}  // namespace intel
+
+}  // namespace com
+#include <com/intel/multiply/BpMultiply.h>
 #include <binder/Parcel.h>
+
+namespace com {
+
+namespace intel {
 
 namespace multiply {
 
@@ -53,8 +65,16 @@ return _aidl_status;
 }
 
 }  // namespace multiply
-#include <multiply/BnMultiply.h>
+
+}  // namespace intel
+
+}  // namespace com
+#include <com/intel/multiply/BnMultiply.h>
 #include <binder/Parcel.h>
+
+namespace com {
+
+namespace intel {
 
 namespace multiply {
 
@@ -105,3 +125,7 @@ return _aidl_ret_status;
 }
 
 }  // namespace multiply
+
+}  // namespace intel
+
+}  // namespace com

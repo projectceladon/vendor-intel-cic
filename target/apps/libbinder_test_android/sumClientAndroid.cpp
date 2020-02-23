@@ -17,10 +17,10 @@
 
 #include <binder/IServiceManager.h>
 #include <iostream>
-#include <sum/ISum.h>
+#include <com/intel/sum/ISum.h>
 
 using namespace android;
-using namespace sum;
+using namespace com::intel::sum;
 using namespace std;
 
 int main()
