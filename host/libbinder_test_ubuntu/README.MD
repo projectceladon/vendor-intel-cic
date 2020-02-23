@@ -64,4 +64,4 @@ Input a:23
 Input b:31
 a = 23 b = 31 expected_value = 713
 Pass. actual_value(713) equals expected_value.
-# For the IPC between java service and Ubuntu client. Please th developer reference SubtractServiceApplication and subtractClientUbuntu.
+# For the IPC between java service and Ubuntu client. Please the developer reference SubtractServiceApplication and subtractClientUbuntu.
