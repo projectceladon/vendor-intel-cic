@@ -17,11 +17,7 @@
 #ifndef ANDROID_PRINTER_H
 #define ANDROID_PRINTER_H
 
-#if OS_UBUNTU
-#include <cutils/log.h>                                                                                                                                                                                     
-#else
 #include <android/log.h>
-#endif
 
 namespace android {
 

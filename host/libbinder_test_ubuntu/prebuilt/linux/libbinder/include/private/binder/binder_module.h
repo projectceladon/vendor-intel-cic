@@ -24,11 +24,7 @@ namespace android {
 /* obtain structures and constants from the kernel header */
 
 #include <sys/ioctl.h>
-#if OS_UBUNTU
-#include <uapi/binder.h>
-#else
-#include <linux/binder.h>
-#endif
+#include <linux/android/binder.h>
 
 #ifdef __cplusplus
 }   // namespace android

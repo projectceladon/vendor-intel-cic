@@ -17,6 +17,8 @@
 #ifndef ANDROID_IBATTERYSTATS_H
 #define ANDROID_IBATTERYSTATS_H
 
+#ifndef __ANDROID_VNDK__
+
 #include <binder/IInterface.h>
 
 namespace android {
@@ -26,7 +28,7 @@ namespace android {
 class IBatteryStats : public IInterface
 {
 public:
-    DECLARE_META_INTERFACE(BatteryStats);
+    DECLARE_META_INTERFACE(BatteryStats)
 
     virtual void noteStartSensor(int uid, int sensor) = 0;
     virtual void noteStopSensor(int uid, int sensor) = 0;
@@ -75,5 +77,9 @@ public:
 // ----------------------------------------------------------------------
 
 }; // namespace android
+
+#else // __ANDROID_VNDK__
+#error "This header is not visible to vendors"
+#endif // __ANDROID_VNDK__
 
 #endif // ANDROID_IBATTERYSTATS_H

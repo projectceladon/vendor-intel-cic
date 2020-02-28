@@ -18,14 +18,7 @@
 #define ANDROID_PROCESS_CALLSTACK_H
 
 #include <utils/CallStack.h>
-
-#if OS_UBUNTU
-#include <cutils/log.h>
-#include <unistd.h>
-#else
 #include <android/log.h>
-#endif
-
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 

@@ -26,10 +26,18 @@ namespace android {
 
 class Parcel;
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#endif
+
 // Abstract interface of all parcelables.
 class Parcelable {
 public:
     virtual ~Parcelable() = default;
+
+    Parcelable() = default;
+    Parcelable(const Parcelable&) = default;
 
     // Write |this| parcelable to the given |parcel|.  Keep in mind that
     // implementations of writeToParcel must be manually kept in sync
@@ -45,6 +53,10 @@ public:
     // Returns android::OK on success and an appropriate error otherwise.
     virtual status_t readFromParcel(const Parcel* parcel) = 0;
 };  // class Parcelable
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 }  // namespace android
 

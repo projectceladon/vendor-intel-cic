@@ -17,14 +17,8 @@
 #ifndef ANDROID_CALLSTACK_H
 #define ANDROID_CALLSTACK_H
 
-#if OS_UBUNTU
-#define BACKTRACE_CURRENT_PROCESS -1
-#define BACKTRACE_CURRENT_THREAD -1
-#define MAX_BACKTRACE_FRAMES 64
-#else
 #include <android/log.h>
 #include <backtrace/backtrace_constants.h>
-#endif
 #include <utils/String8.h>
 #include <utils/Vector.h>
 

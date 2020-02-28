@@ -18,6 +18,7 @@
 #define ANDROID_BINDER_STATUS_H
 
 #include <cstdint>
+#include <sstream>
 
 #include <binder/Parcel.h>
 #include <utils/String8.h>
@@ -61,6 +62,7 @@ public:
         EX_NETWORK_MAIN_THREAD = -6,
         EX_UNSUPPORTED_OPERATION = -7,
         EX_SERVICE_SPECIFIC = -8,
+        EX_PARCELABLE = -9,
 
         // This is special and Java specific; see Parcel.java.
         EX_HAS_REPLY_HEADER = -128,
@@ -71,6 +73,7 @@ public:
 
     // A more readable alias for the default constructor.
     static Status ok();
+
     // Authors should explicitly pick whether their integer is:
     //  - an exception code (EX_* above)
     //  - service specific error code
@@ -83,9 +86,15 @@ public:
     static Status fromExceptionCode(int32_t exceptionCode);
     static Status fromExceptionCode(int32_t exceptionCode,
                                     const String8& message);
+    static Status fromExceptionCode(int32_t exceptionCode,
+                                    const char* message);
+
     static Status fromServiceSpecificError(int32_t serviceSpecificErrorCode);
     static Status fromServiceSpecificError(int32_t serviceSpecificErrorCode,
                                            const String8& message);
+    static Status fromServiceSpecificError(int32_t serviceSpecificErrorCode,
+                                           const char* message);
+
     static Status fromStatusT(status_t status);
 
     Status() = default;
@@ -142,11 +151,7 @@ private:
 };  // class Status
 
 // For gtest output logging
-template<typename T>
-T& operator<< (T& stream, const Status& s) {
-    stream << s.toString8().string();
-    return stream;
-}
+std::stringstream& operator<< (std::stringstream& stream, const Status& s);
 
 }  // namespace binder
 }  // namespace android

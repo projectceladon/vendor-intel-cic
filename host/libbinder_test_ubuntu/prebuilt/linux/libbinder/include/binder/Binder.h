@@ -17,7 +17,17 @@
 #ifndef ANDROID_BINDER_H
 #define ANDROID_BINDER_H
 
+#ifdef OS_UBUNTU
+#ifndef __cplusplus
+#include <stdatomic.h>
+#else
 #include <atomic>
+using namespace std;
+#endif
+#else
+#include <atomic>
+#endif
+
 #include <stdint.h>
 #include <binder/IBinder.h>
 
@@ -80,7 +90,7 @@ private:
 class BpRefBase : public virtual RefBase
 {
 protected:
-                            BpRefBase(const sp<IBinder>& o);
+    explicit                BpRefBase(const sp<IBinder>& o);
     virtual                 ~BpRefBase();
     virtual void            onFirstRef();
     virtual void            onLastStrongRef(const void* id);
