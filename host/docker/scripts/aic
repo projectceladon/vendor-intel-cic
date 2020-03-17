@@ -841,6 +841,13 @@ function start {
             fi
         fi
     done
+
+    if [[ $WLAN_PT == "true" ]] ; then
+	    ANDROID_PID=$(sudo docker inspect -f '{{.State.Pid}}' android0)
+	    iw phy phy0 set netns $ANDROID_PID
+	    nsenter -t $ANDROID_PID -n ip link set wlp1s0 name wlan0
+    fi
+
 }
 
 function stop {
