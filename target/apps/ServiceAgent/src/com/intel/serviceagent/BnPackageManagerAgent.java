@@ -155,6 +155,7 @@ public class BnPackageManagerAgent extends IPackageManagerAgent.Stub {
                     }
                     FileOutputStream fos = new FileOutputStream(f);
                     fos.write(os.toByteArray());
+                    fos.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
