@@ -3,6 +3,10 @@ FROM ubuntu:bionic
 ARG DEBIAN_FRONTEND=noninteractive
 
 # install essential modules
+RUN apt-get update && \
+        apt-get install -y software-properties-common && \
+        add-apt-repository ppa:kisak/kisak-mesa
+
 RUN apt-get -q -y update \
         && apt-get -q -y -o "DPkg::Options::=--force-confold" -o "DPkg::Options::=--force-confdef" \
         install build-essential kmod libelf-dev libdrm-dev libegl1-mesa-dev libgles2-mesa \
