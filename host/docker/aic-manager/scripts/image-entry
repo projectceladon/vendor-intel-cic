@@ -3,6 +3,7 @@
 SYSTEM_IMAGES="system.img vendor.img oem.img product.img"
 SYSTEM_IMAGES_DIR=$(cd $(dirname $0) && pwd -P)
 SYSTEM_IMAGES_MOUNT_DIR=/media
+SYSTEM_IMAGES_MOUNT_DONE=/media/.mount_done
 
 function log() {
     echo "[$0 ($$/$PPID)] $@"
@@ -29,7 +30,13 @@ function mount_system_images() {
             # --direct-io is default on, and set it as read only
             # busybox does not support --show option, so setup first then find it
             log "setup loop device for $file"
-            if losetup -f -r $file
+            unused_loop=$(losetup -f)
+            loop_index=$(echo $unused_loop | tr -dc '0-9')
+            if [ ! -b $unused_loop ]; then
+                 mknod -m 660 $unused_loop b 7 $loop_index
+            fi
+
+            if losetup $unused_loop $file
             then
                 loop=$(losetup -a | grep $file | cut -d: -f1 | tail -n1)
                 mkdir -p $dest
@@ -41,11 +48,13 @@ function mount_system_images() {
             fi
         fi
     done
+    touch $SYSTEM_IMAGES_MOUNT_DONE
     log $FUNCNAME done
 }
 
 function umount_system_images() {
     log $FUNCNAME
+    rm -f $SYSTEM_IMAGES_MOUNT_DONE
     for img in $SYSTEM_IMAGES
     do
         file=$SYSTEM_IMAGES_DIR/$img
