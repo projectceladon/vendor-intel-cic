@@ -53,6 +53,16 @@ function check_data_img {
     fi
 }
 
+function check_verity_metadata {
+    if [ -n "$(sudo find /var/lib/docker -name verity_metadata)" ]; then
+        while [ -z "$(ls $(pwd)/workdir/media/system 2>/dev/null)" ]
+        do
+            echo "[AIC] wait for system image to be mounted..."
+            sleep 1
+        done
+    fi
+}
+
 function prepare_data_partition {
     data_name=$1
     # Check losetup settings
@@ -600,7 +610,7 @@ function install {
     fi
 
     # create aic-manager container
-    AIC_MANAGER_CONTAINER_OPTION="-v /lib/modules:/lib/modules -v /usr/src:/usr/src -v $WORK_DIR/ipc:/ipc -v $WORK_DIR/media:/media:shared"
+    AIC_MANAGER_CONTAINER_OPTION="-v /lib/modules:/lib/modules -v /dev/mapper:/dev/mapper -v /usr/src:/usr/src -v $WORK_DIR/ipc:/ipc -v $WORK_DIR/media:/media:shared"
     AIC_MANAGER_CONTAINER_CMDS="-n $INSTANCE_NUM"
     if [ "$EMULATED_WIFI" = "true" ]; then
         AIC_MANAGER_CONTAINER_OPTION="$AIC_MANAGER_CONTAINER_OPTION -v /proc:/hostproc -v /var/run/docker.sock:/var/run/docker.sock"
@@ -887,6 +897,8 @@ function start {
         echo "[AIC] wait for ashmem driver to be installed..."
         sleep 1
     done
+
+    check_verity_metadata
 
     for c in ${CONTAINERS[@]}
     do

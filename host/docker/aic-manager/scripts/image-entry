@@ -3,6 +3,8 @@
 SYSTEM_IMAGES="system.img vendor.img oem.img product.img"
 SYSTEM_IMAGES_DIR=$(cd $(dirname $0) && pwd -P)
 SYSTEM_IMAGES_MOUNT_DIR=/media
+SYSTEM_VERITY_IMAGE=$SYSTEM_IMAGES_DIR/verity_metadata
+SYSTEM_DM=system-dm
 
 function log() {
     echo "[$0 ($$/$PPID)] $@"
@@ -21,23 +23,41 @@ function mount_system_images() {
 
         name=$(basename $img .img)
         dest=$SYSTEM_IMAGES_MOUNT_DIR/$name
+        mkdir -p $dest
         device=$(mount | grep "on $dest" | cut -d' ' -f1)
         if [[ -n $device ]]
         then
             log "$device has already mounted on $dest, skip"
         else
-            # --direct-io is default on, and set it as read only
-            # busybox does not support --show option, so setup first then find it
-            log "setup loop device for $file"
-            if losetup -f -r $file
+            if [ -f "$SYSTEM_VERITY_IMAGE" ]
             then
-                loop=$(losetup -a | grep $file | cut -d: -f1 | tail -n1)
-                mkdir -p $dest
-                log "mount $loop to $dest"
-                mount -o ro $loop $dest
+                if [[ -n $(ls -l /dev/mapper | grep $SYSTEM_DM) ]]
+                then
+                    log "the dm device for $SYSTEM_DM has been created, skip"
+                else
+                    log "create the dm device: $SYSTEM_DM"
+                    $SYSTEM_IMAGES_DIR/cic_veritysetup create $SYSTEM_DM $file $SYSTEM_VERITY_IMAGE
+                    if [ $? -ne 0 ]; then
+                        log "failed to create the dm device for $file"
+                        exit -1
+                    fi
+                fi
+                log "mount dm device($SYSTEM_DM) to $dest"
+                mount -o ro /dev/mapper/$SYSTEM_DM $dest
             else
-                log "fail to setup loop device"
-                exit -1
+                # --direct-io is default on, and set it as read only
+                # busybox does not support --show option, so setup first then find it
+                log "setup loop device for $file"
+                if losetup -f -r $file
+                then
+                    loop=$(losetup -a | grep $file | cut -d: -f1 | tail -n1)
+                    mkdir -p $dest
+                    log "mount $loop to $dest"
+                    mount -o ro $loop $dest
+                else
+                    log "fail to setup loop device"
+                    exit -1
+                fi
             fi
         fi
     done
@@ -56,12 +76,21 @@ function umount_system_images() {
             log "umount $dest"
             umount $dest
         fi
-        loop=$(losetup -a | grep $file | cut -d: -f1)
-        for lo in $loop
-        do
-            log "detach $lo"
-            losetup -d $lo
-        done
+        if [ -f "$SYSTEM_VERITY_IMAGE" ]
+        then
+            if [[ -n $(ls -l /dev/mapper | grep $SYSTEM_DM) ]]
+            then
+                log "remvoe the dm device: $SYSTEM_DM"
+                $SYSTEM_IMAGES_DIR/cic_veritysetup remove $SYSTEM_DM
+            fi
+        else
+            loop=$(losetup -a | grep $file | cut -d: -f1)
+            for lo in $loop
+            do
+                log "detach $lo"
+                losetup -d $lo
+            done
+        fi
     done
     log $FUNCNAME done
 }
