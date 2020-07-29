@@ -1,0 +1,39 @@
+#!$(PAL)
+
+loader.preload = file:/graphene/Runtime/libsysdb.so
+
+loader.exec = file:/tee/cickeymasterd
+loader.env.LD_LIBRARY_PATH = /lib:.
+loader.env.PATH = /bin:/usr/bin
+loader.debug_type = none
+
+fs.mount.lib1.type = chroot
+fs.mount.lib1.path = /lib
+fs.mount.lib1.uri = file:/graphene/Runtime
+
+# Minimum amount of memory to make it work.
+sgx.enclave_size = 256M
+
+sgx.thread_num = 16
+
+# Start at static addresses (otherwise breaks when static and PIE executables are used)
+sgx.static_address = 1
+
+sgx.require_avx = 1
+#sgx.require_avx512 = 1
+
+# SGX related configs
+sgx.enclave_pal_file = file:/graphene/Runtime/libpal-Linux-SGX.so
+loader.argv_src_file = file:trusted_argv
+sgx.trusted_files.trusted_argv = file:trusted_argv
+
+# Glibc and C++ libraries
+sgx.trusted_files.ld = file:/graphene/Runtime/ld-linux-x86-64.so.2
+sgx.trusted_files.libc = file:/graphene/Runtime/libc.so.6
+sgx.trusted_files.libdl = file:/graphene/Runtime/libdl.so.2
+sgx.trusted_files.libm = file:/graphene/Runtime/libm.so.6
+sgx.trusted_files.libpthread = file:/graphene/Runtime/libpthread.so.0
+sgx.trusted_files.librt = file:/graphene/Runtime/librt.so.1
+sgx.trusted_files.libcpp = file:/graphene/Runtime/libstdc++.so.6
+sgx.trusted_files.libgcc = file:/graphene/Runtime/libgcc_s.so.1
+

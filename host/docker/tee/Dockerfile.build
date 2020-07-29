@@ -1,0 +1,108 @@
+FROM ubuntu:18.04 AS graphene-runtime
+
+# Add steps here to set up dependencies
+RUN env DEBIAN_FRONTEND=noninteractive apt-get update \
+    && env DEBIAN_FRONTEND=noninteractive apt-get install -y \
+		autoconf \
+		bison \
+		build-essential \
+		coreutils \
+		gawk \
+		git \
+		libcurl4-openssl-dev \
+		libprotobuf-c-dev \
+		protobuf-c-compiler \
+		python3-protobuf \
+		wget \
+		python3 \
+        python3-pip \
+        python3-protobuf \
+        libprotobuf-c-dev \
+        binutils \
+        openssl \
+		net-tools \
+		gdb \
+		less \
+		strace \
+		vim \
+		ocaml \
+		ocamlbuild \
+		automake \
+		libtool \
+		python \
+		libssl-dev \
+		cmake \
+		perl \
+		protobuf-compiler \
+		libprotobuf-dev \
+		debhelper \
+		reprepro \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
+
+# Clone graphene and Init submodules
+# using the branch: master branch
+WORKDIR /tmp
+RUN git clone -b master https://github.com/oscarlab/graphene.git \
+	&& cd graphene \
+    && git submodule update --init -- Pal/src/host/Linux-SGX/sgx-driver
+
+# Create SGX driver for header files
+# using the tag version: sgx_driver_2.6
+WORKDIR /tmp
+RUN git clone https://github.com/01org/linux-sgx-driver.git \
+    && cd linux-sgx-driver \
+    && git checkout sgx_driver_2.6
+
+# Build Graphene-SGX
+WORKDIR /tmp
+RUN cd graphene \
+	&& ISGX_DRIVER_PATH=/tmp/linux-sgx-driver \
+    make -s -j32 SGX=1 WERROR=1
+
+# Translate runtime symlinks to files
+WORKDIR /tmp
+RUN for f in $(find graphene/Runtime -type l); \
+		do cp --remove-destination $(readlink $f) $f; \
+	done
+
+# Copy Graphene runtime and signer tools to /graphene
+# And cleanup the intermediate files/codes in /tmp/
+WORKDIR /tmp
+RUN mkdir -p /graphene \
+    && mkdir -p /graphene/Runtime \
+    && mkdir -p /graphene/signer \
+	&& cp -rf graphene/Runtime/* /graphene/Runtime \
+	&& cp graphene/Pal/src/host/Linux-SGX/signer/aesm_pb2.py /graphene/signer \
+	&& cp graphene/Pal/src/host/Linux-SGX/signer/pal-sgx-get-token /graphene/signer \
+	&& cp graphene/Pal/src/host/Linux-SGX/signer/pal-sgx-sign /graphene/signer \
+	&& cp graphene/Pal/src/host/Linux-SGX/signer/pal_sgx_sign.py /graphene/signer \
+	&& cp graphene/Pal/src/host/Linux-SGX/generated_offsets.py /graphene/signer/ \
+	&& cp graphene/Pal/src/host/Linux-SGX/debugger/sgx_gdb.so /graphene/Runtime \
+	&& cp graphene/Pal/src/host/Linux-SGX/debugger/pal-gdb.py /graphene/Runtime \
+	&& cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /graphene/Runtime \
+	&& cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /graphene/Runtime \
+	&& rm -rf graphene/*
+
+# Clone SGX-SDK
+# Using the tag version: sgx_2.9.1
+RUN cd /tmp \
+	&& git clone https://github.com/intel/linux-sgx.git \
+    && cd linux-sgx \
+	&& git checkout sgx_2.9.1 \
+    && ./download_prebuilt.sh \
+    && cp ./external/toolset/as /usr/local/bin/ \
+    && cp ./external/toolset/ld /usr/local/bin/ \
+    && cp ./external/toolset/ld.gold /usr/local/bin/ \
+    && cp ./external/toolset/objdump /usr/local/bin/
+
+# Build and install SGX-SDK
+COPY ./scripts/sgxsdk_build_install.sh /tmp
+RUN mkdir -p /opt/intel \
+	&& chmod u+x /tmp/sgxsdk_build_install.sh \
+    && /tmp/sgxsdk_build_install.sh \
+    && echo 'source /opt/intel/sgxsdk/environment' >> /root/.bashrc \
+	&& rm -rf /tmp/linux-sgx/*
+
+# Graphene-SGX runtime prepared done
+WORKDIR /

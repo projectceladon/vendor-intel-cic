@@ -43,6 +43,10 @@ function check_containers {
         echo "[AIC] android container not existed, please re-install aic!"
         exit -1
     fi
+    if [ -z "$($DOCKER ps -a | awk '{print $NF}' | grep tee)" ]; then
+        echo "[AIC] tee container not existed, please re-install aic!"
+        exit -1
+    fi
 }
 
 function check_data_img {
@@ -134,6 +138,7 @@ function delete_data_partition {
 function parse_ids {
     if [ "${#IDS[@]}" -eq 0 ]; then
         CONTAINERS=($($DOCKER ps -a | awk '{print $NF}' | grep android))
+		TEE_CONTAINERS=($($DOCKER ps -a | awk '{print $NF}' | grep tee))
     else
         for id in ${IDS[@]}
         do
@@ -146,6 +151,7 @@ function parse_ids {
                 for c in $(seq ${ID_RANGE[0]} ${ID_RANGE[1]})
                 do
                     CONTAINERS+=(android$c)
+					TEE_CONTAINERS+=(tee$c)
                 done
             else
                 if ! check_num $id; then
@@ -153,6 +159,7 @@ function parse_ids {
                     exit -1
                 fi
                 CONTAINERS+=(android$id)
+				TEE_CONTAINERS+=(tee$c)
             fi
         done
     fi
@@ -565,13 +572,16 @@ function install {
 
     AIC_MANAGER_IMAGE_FILE=aic-manager.tar.gz
     ANDROID_IMAGE_FILE=android.tar.gz
+	TEE_IMAGE_FILE=tee.tar.gz
     AIC_MANAGER_IMAGE=aic-manager:latest
     ANDROID_IMAGE=android:latest
+	TEE_IMAGE=tee:latest
     if [ ! -z "$IMAGE_TAG" ]; then
         AIC_MANAGER_IMAGE="aic-manager:$IMAGE_TAG"
         ANDROID_IMAGE="android:$IMAGE_TAG"
+		TEE_IMAGE="tee:$IMAGE_TAG"
     fi
-    if [ ! -e "$AIC_MANAGER_IMAGE_FILE" ] || [ ! -e "$ANDROID_IMAGE_FILE" ]; then
+    if [ ! -e "$AIC_MANAGER_IMAGE_FILE" ] || [ ! -e "$ANDROID_IMAGE_FILE" ] || [ ! -e "$TEE_IMAGE_FILE" ]; then
         echo "[AIC] Missing Android or aic-manager docker image files, plese check you installation!"
         exit -1
     fi
@@ -600,7 +610,7 @@ function install {
     fi
 
     # uninstall previous resources
-    if [ ! -z "$($DOCKER ps -a | grep -E 'android|aic-manager')" ] || [ ! -z "$($DOCKER images | grep -E 'android|aic-manager')" ]; then
+    if [ ! -z "$($DOCKER ps -a | grep -E 'android|aic-manager|tee')" ] || [ ! -z "$($DOCKER images | grep -E 'android|aic-manager|tee')" ]; then
         echo "[AIC] Uninstall existing resources first..."
         uninstall
     fi
@@ -626,6 +636,7 @@ function install {
     echo "[AIC] Load images..."
     $DOCKER load -i $AIC_MANAGER_IMAGE_FILE
     $DOCKER load -i $ANDROID_IMAGE_FILE
+	$DOCKER load -i $TEE_IMAGE_FILE
     if [ "$ANDROID_UPDATE" = "true" ]; then
         $DOCKER tag $ANDROID_IMAGE android_base
         $DOCKER rmi $ANDROID_IMAGE
@@ -755,6 +766,12 @@ function install {
         ANDROID_CONTAINER_OPTION="$ANDROID_CONTAINER_OPTION -v $WORK_DIR/audio:/ipc/config/audio"
         $DOCKER container create --name android$i --cpuset-cpus=$CPU_SET --cpuset-mems=${MEM_NODES:-0} --privileged=true $ANDROID_CONTAINER_OPTION $ANDROID_IMAGE $ANDROID_CONTAINER_CMDS $i
 
+        echo "[AIC] create tee container..."
+        TEE_MAC=02:42:ac:64:$(printf "%02x" $((($i+1) / 256))):$(printf "%02x" $((($i+1) % 256)))
+        TEE_IP=172.100.$((($i + 3) / 256)).$((($i + 3) % 256))
+
+		TEE_CONTAINER_OPTION="--net android --ip $TEE_IP --mac-address $TEE_MAC --device=/dev/isgx"
+        $DOCKER container create --name tee$i --privileged=true $TEE_CONTAINER_OPTION $TEE_IMAGE
     done
 }
 
@@ -780,14 +797,14 @@ function uninstall {
     fi
 
     # rm containers
-    CONTAINERS=$($DOCKER ps -a | awk '{print $NF}' | grep -E 'android|aic-manager')
+    CONTAINERS=$($DOCKER ps -a | awk '{print $NF}' | grep -E 'android|aic-manager|tee')
     if [ ! -z "$CONTAINERS" ]; then
         echo "[AIC] rm containers..."
         $DOCKER rm $CONTAINERS
     fi
 
     # rm images
-    IMAGES=$($DOCKER images | grep -E 'android|aic-manager' | awk '{print $3}')
+    IMAGES=$($DOCKER images | grep -E 'android|aic-manager|tee' | awk '{print $3}')
     if [ ! -z "$IMAGES" ]; then
         echo "[AIC] rm images..."
         $DOCKER rmi $IMAGES
@@ -825,6 +842,7 @@ function start {
 
     IDS=()
     CONTAINERS=()
+	TEE_CONTAINERS=()
     MULTI_USER_DIR=$(echo -n $($DOCKER inspect -f '{{ range .Mounts }}{{ if eq .Destination "/data-multi-user" }}{{ .Source }}{{ end }} {{ end }}' aic-manager 2>/dev/null))
     while [ "$#" -gt 0  ]
     do
@@ -913,6 +931,16 @@ function start {
         fi
     fi
 
+    EXISTED_TEE_CONTAINERS=$($DOCKER ps -a | awk '{print $NF}' | grep tee)
+    for c in ${TEE_CONTAINERS[@]}
+    do
+        if [[ ! $EXISTED_TEE_CONTAINERS =~ (^|[[:space:]])"$c"($|[[:space:]]) ]]; then
+            echo "[AIC] $c not existed!"
+        else
+            $DOCKER start $c
+        fi
+    done
+
     EXISTED_CONTAINERS=$($DOCKER ps -a | awk '{print $NF}' | grep android)
 
 
@@ -973,6 +1001,7 @@ function stop {
 
     IDS=()
     CONTAINERS=()
+	TEE_CONTAINERS=()
     while [ "$#" -gt 0  ]
     do
         case "$1" in
@@ -996,6 +1025,16 @@ function stop {
     for c in ${CONTAINERS[@]}
     do
         if [[ ! $EXISTED_CONTAINERS =~ (^|[[:space:]])"$c"($|[[:space:]]) ]]; then
+            echo "[AIC] $c not existed!"
+        else
+            $DOCKER stop -t0 $c
+        fi
+    done
+
+    EXISTED_TEE_CONTAINERS=$($DOCKER ps -a | awk '{print $NF}' | grep tee)
+    for c in ${TEE_CONTAINERS[@]}
+    do
+        if [[ ! $EXISTED_TEE_CONTAINERS =~ (^|[[:space:]])"$c"($|[[:space:]]) ]]; then
             echo "[AIC] $c not existed!"
         else
             $DOCKER stop -t0 $c
