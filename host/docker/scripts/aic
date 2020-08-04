@@ -15,6 +15,19 @@ function check_num {
     esac
 }
 
+function check_required_tools_for_fbe {
+    if [ ! -x "$(command -v pvcreate)" ]; then
+        echo "[AIC] The lvm2 tool seems not installed, will install for you..."
+        sudo apt --assume-yes install lvm2
+    fi
+
+
+    if [ ! -x "$(command -v thin_check)" ]; then
+        echo "[AIC] The thin-provisioning-tools seems not installed, will install for you..."
+        sudo apt --assume-yes install thin-provisioning-tools
+    fi
+}
+
 function check_docker {
     if [ ! -x "$(command -v docker)" ]; then
         echo "[AIC] docker not installed, please install it first!"
@@ -533,6 +546,11 @@ function install {
                 ;;
         esac
     done
+
+    if [ "$ENABLE_FBE" = "true" ]; then
+        check_required_tools_for_fbe
+    fi
+
     check_docker
     check_kernel_header
 
