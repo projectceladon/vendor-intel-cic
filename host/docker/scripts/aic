@@ -21,6 +21,10 @@ function check_docker {
         exit -1
     fi
 }
+function docker_vol_create {
+	echo "[AIC] SMN-c create docker volume creation"
+	docker volume create boot_reason
+}
 
 function check_kernel_header {
     if [ -z "$(ls /dev/binder* 2>/dev/null)" ] && [ ! -d "/lib/modules/$(uname -r)/build" ]; then
@@ -688,6 +692,7 @@ function install {
 
     # create Android containers
     ANDROID_CONTAINER_OPTION="-v $APP_DIR:/oem/app:ro -v $WORK_DIR/ipc:/ipc -v /dev/binderfs:/binderfs:rw -v /dev/usb:/data/misc/usb"
+    ANDROID_CONTAINER_OPTION="$ANDROID_CONTAINER_OPTION --mount source=boot_reason,target=/opt/boot_reason"
     get_system_image_mount_options && ANDROID_CONTAINER_OPTION="$ANDROID_CONTAINER_OPTION $SYSTEM_IMAGE_MOUNT_OPTIONS"
     if [ ! -z "$DISPLAY_DENSITY" ]; then
         ANDROID_CONTAINER_CMDS="-t $DISPLAY_DENSITY"
@@ -871,6 +876,7 @@ function start {
     done
 
     check_docker
+    docker_vol_create
     check_containers
     parse_ids
 
